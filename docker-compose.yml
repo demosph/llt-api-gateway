@@ -1,0 +1,18 @@
+services:
+  gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on: []
+    networks:
+      - llt-net
+
+networks:
+  llt-net:
+    external: true
+    name: llt-net

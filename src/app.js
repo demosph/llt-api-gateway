@@ -20,7 +20,16 @@ export function buildApp() {
 
   app.set("trust proxy", process.env.TRUST_PROXY ?? true);
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          upgradeInsecureRequests: null,
+        },
+      },
+    })
+  );
 
   const corsOptions = {
     origin: cfg.corsOrigin === "*" ? true : cfg.corsOrigin,

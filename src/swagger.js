@@ -94,7 +94,7 @@ const prefsSchema = {
       example: ["car", "walk"],
     },
   },
-  additionalProperties: true,
+  additionalProperties: false,
 };
 
 // Trips

@@ -31,7 +31,7 @@ const cfg = {
     ai: process.env.AI_SERVICE_URL,
   },
 
-  publicBaseUrl: process.env.PUBLIC_BASE_URL ?? "http://localhost:3000",
+  publicBaseUrl: process.env.PUBLIC_BASE_URL,
 };
 
 // Підтягуємо публічний ключ для RS256 (якщо задано шлях)

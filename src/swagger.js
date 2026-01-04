@@ -213,7 +213,7 @@ const serverUrl =
   typeof cfg.publicBaseUrl === "string" &&
   /^https?:\/\//.test(cfg.publicBaseUrl)
     ? cfg.publicBaseUrl
-    : "http://localhost:3000";
+    : "/";
 
 export const openapi = {
   openapi: "3.0.3",

@@ -81,13 +81,18 @@ const patchMeSchema = {
 const prefsSchema = {
   type: "object",
   properties: {
+    home_city: { type: "string", example: "Kyiv" },
     interests: {
       type: "array",
       items: { type: "string" },
       example: ["food", "history"],
     },
-    budget: { type: "string", example: "medium" },
-    travelStyle: { type: "string", example: "relaxed" },
+    avg_daily_budget: { type: "int", example: 5000 },
+    transport_modes: {
+      type: "array",
+      items: { type: "string" },
+      example: ["car", "walk"],
+    },
   },
   additionalProperties: true,
 };

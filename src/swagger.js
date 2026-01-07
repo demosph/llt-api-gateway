@@ -30,6 +30,7 @@ const queryParam = (name, type, description, required = false) => ({
 });
 
 // базові схеми (мінімально достатні для Swagger UI)
+// Auth
 const registerSchema = {
   type: "object",
   properties: {
@@ -69,6 +70,7 @@ const googleIdTokenSchema = {
   additionalProperties: false,
 };
 
+// Users
 const patchMeSchema = {
   type: "object",
   properties: {
@@ -101,24 +103,39 @@ const prefsSchema = {
 const tripCreateSchema = {
   type: "object",
   properties: {
-    title: { type: "string", example: "Weekend in Lviv" },
-    startDate: { type: "string", example: "2026-01-10" },
-    endDate: { type: "string", example: "2026-01-12" },
-    city: { type: "string", example: "Lviv" },
-    country: { type: "string", example: "Ukraine" },
+    userId: {
+      type: "string",
+      format: "uuid",
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    },
+    title: { type: "string", example: "Weekend in Paris" },
+    startDate: { type: "string", example: "2024-06-01" },
+    endDate: { type: "string", example: "2024-06-03" },
+    originCity: { type: "string", example: "Kyiv" },
+    originLat: { type: "number", example: 50.4501 },
+    originLng: { type: "number", example: 30.5234 },
   },
-  required: ["title"],
+  required: [
+    "userId",
+    "title",
+    "startDate",
+    "endDate",
+    "originCity",
+    "originLat",
+    "originLng",
+  ],
   additionalProperties: false,
 };
 
 const tripPatchSchema = {
   type: "object",
   properties: {
-    title: { type: "string" },
-    startDate: { type: "string" },
-    endDate: { type: "string" },
-    city: { type: "string" },
-    country: { type: "string" },
+    title: { type: "string", example: "Updated Trip Title" },
+    startDate: { type: "string", example: "2024-06-01" },
+    endDate: { type: "string", example: "2024-06-05" },
+    originCity: { type: "string", example: "Lviv" },
+    originLat: { type: "number", example: 49.8397 },
+    originLng: { type: "number", example: 24.0297 },
   },
   additionalProperties: false,
 };
@@ -126,92 +143,328 @@ const tripPatchSchema = {
 const tripAddItemSchema = {
   type: "object",
   properties: {
-    day: { type: "integer", example: 1 },
-    title: { type: "string", example: "Visit old town" },
-    description: { type: "string" },
-    time: { type: "string", example: "10:00" },
+    googlePlaceId: {
+      type: "string",
+      example: "ChIJD7fiBh9u5kcRYJSMaMOCCwQ",
+    },
+    name: { type: "string", example: "Eiffel Tower" },
     location: {
       type: "object",
       properties: {
-        lat: { type: "number", example: 49.8419 },
-        lng: { type: "number", example: 24.0315 },
-        address: { type: "string" },
+        lat: { type: "number", example: 48.8584 },
+        lng: { type: "number", example: 2.2945 },
       },
+      required: ["lat", "lng"],
       additionalProperties: false,
     },
+    address: {
+      type: "string",
+      example: "Champ de Mars, 5 Av. Anatole France",
+    },
+    categories: {
+      type: "array",
+      items: { type: "string" },
+      example: ["string"],
+    },
+    dayIndex: { type: "integer", example: 0 },
+    orderIndex: { type: "integer", example: 1 },
+    title: { type: "string", example: "string" },
+    description: { type: "string", example: "string" },
   },
-  required: ["title"],
+  required: ["googlePlaceId", "name", "location", "dayIndex", "orderIndex"],
   additionalProperties: false,
 };
 
 // Integrations
+// POST /maps/pois (request)
 const integrationPoisSchema = {
   type: "object",
   properties: {
-    city: { type: "string", example: "Kyiv" },
+    city: { type: "string", example: "Київ" },
     interests: {
       type: "array",
       items: { type: "string" },
-      example: ["museum", "coffee"],
+      example: ["history", "food"],
     },
-    limit: { type: "integer", example: 10 },
   },
-  required: ["city"],
+  required: ["city", "interests"],
   additionalProperties: false,
 };
 
+// POST /maps/pois (response)
+const poiSchema = {
+  type: "object",
+  properties: {
+    name: { type: "string", example: "Софійський собор" },
+    lat: { type: "number", example: 50.4529 },
+    lng: { type: "number", example: 30.5143 },
+    rating: { type: "number", example: 4.9 },
+    category: { type: "string", example: "history" },
+    city: { type: "string", example: "Київ" },
+  },
+  required: ["name", "lat", "lng", "category", "city"],
+  additionalProperties: false,
+};
+
+const poisResponseSchema = {
+  type: "object",
+  properties: {
+    data: {
+      type: "array",
+      items: poiSchema,
+    },
+  },
+  required: ["data"],
+  additionalProperties: false,
+};
+
+// GET /maps/city (response)
+const cityInfoResponseSchema = {
+  type: "object",
+  properties: {
+    data: {
+      type: "object",
+      properties: {
+        name: { type: "string", example: "Київ" },
+        name_en: { type: "string", example: "Kyiv" },
+        coordinates: {
+          type: "object",
+          properties: {
+            lat: { type: "number", example: 50.4501 },
+            lng: { type: "number", example: 30.5234 },
+          },
+          required: ["lat", "lng"],
+          additionalProperties: false,
+        },
+        country: { type: "string", example: "Ukraine" },
+      },
+      required: ["name", "name_en", "coordinates", "country"],
+      additionalProperties: false,
+    },
+  },
+  required: ["data"],
+  additionalProperties: false,
+};
+
+// GET /weather/city (response)
+const weatherForecastItemSchema = {
+  type: "object",
+  properties: {
+    date: { type: "string", example: "2025-12-18" },
+    temp_min_c: { type: "number", example: -2.5 },
+    temp_max_c: { type: "number", example: 3.8 },
+    condition: { type: "string", example: "light snow" },
+    humidity_percent: { type: "number", example: 78 },
+    precipitation_chance: { type: "number", example: 60 },
+  },
+  required: [
+    "date",
+    "temp_min_c",
+    "temp_max_c",
+    "condition",
+    "humidity_percent",
+    "precipitation_chance",
+  ],
+  additionalProperties: false,
+};
+
+const weatherForecastResponseSchema = {
+  type: "object",
+  properties: {
+    data: {
+      type: "object",
+      properties: {
+        city: { type: "string", example: "Київ" },
+        city_en: { type: "string", example: "Kyiv" },
+        coordinates: {
+          type: "object",
+          properties: {
+            lat: { type: "number", example: 50.4501 },
+            lng: { type: "number", example: 30.5234 },
+          },
+          required: ["lat", "lng"],
+          additionalProperties: false,
+        },
+        forecast: {
+          type: "array",
+          items: weatherForecastItemSchema,
+        },
+      },
+      required: ["city", "city_en", "coordinates", "forecast"],
+      additionalProperties: false,
+    },
+  },
+  required: ["data"],
+  additionalProperties: false,
+};
+
+// GET /calendar/status (response)
+const calendarStatusResponseSchema = {
+  type: "object",
+  properties: {
+    connected: { type: "boolean", example: true },
+  },
+  required: ["connected"],
+  additionalProperties: false,
+};
+
+// POST /calendar/events (request)
 const calendarEventSchema = {
   type: "object",
   properties: {
-    summary: { type: "string", example: "LittleLifeTrip event" },
-    description: { type: "string" },
-    start: { type: "string", example: "2026-01-10T10:00:00Z" },
-    end: { type: "string", example: "2026-01-10T12:00:00Z" },
+    userId: {
+      type: "string",
+      format: "uuid",
+      example: "550e8400-e29b-41d4-a716-446655440000",
+    },
+    title: { type: "string", example: "Trip to Paris" },
+    startDate: { type: "string", example: "2024-01-15" },
+    endDate: { type: "string", example: "2024-01-20" },
+    description: { type: "string", example: "Vacation in France" },
   },
-  required: ["summary", "start", "end"],
+  required: ["userId", "title", "startDate", "endDate"],
+  additionalProperties: false,
+};
+
+// POST /calendar/events (response)
+const calendarEventCreateResponseSchema = {
+  type: "object",
+  properties: {
+    data: {
+      type: "object",
+      properties: {
+        eventId: { type: "string", example: "abc123xyz" },
+        link: {
+          type: "string",
+          example: "https://calendar.google.com/event?eid=abc123xyz",
+        },
+      },
+      required: ["eventId", "link"],
+      additionalProperties: false,
+    },
+  },
+  required: ["data"],
   additionalProperties: false,
 };
 
 // AI
+
 const aiRecommendSchema = {
   type: "object",
   properties: {
-    city: { type: "string", example: "Lviv" },
-    days: { type: "integer", example: 2 },
-    interests: {
-      type: "array",
-      items: { type: "string" },
-      example: ["food", "history"],
+    constraints: {
+      type: "object",
+      properties: {
+        destination_city: { type: "string", example: "Львів" },
+        duration_days: { type: "integer", example: 3 },
+        origin_city: { type: "string", example: "Київ" },
+        total_budget: { type: "integer", example: 15000 },
+        travel_party_size: { type: "integer", example: 2 },
+      },
+      required: [
+        "destination_city",
+        "duration_days",
+        "origin_city",
+        "total_budget",
+        "travel_party_size",
+      ],
+      additionalProperties: false,
     },
-    budget: { type: "string", example: "medium" },
+    timezone: { type: "string", example: "Europe/Kyiv" },
+    user_id: {
+      type: "string",
+      format: "uuid",
+      example: "550e8400-e29b-41d4-a716-446655440000",
+    },
+    user_profile: {
+      type: "object",
+      properties: {
+        avg_daily_budget: { type: "integer", example: 2000 },
+        interests: {
+          type: "array",
+          items: { type: "string" },
+          example: ["history", "food", "culture"],
+        },
+        transport_modes: {
+          type: "array",
+          items: { type: "string" },
+          example: ["walking", "public_transport"],
+        },
+      },
+      required: ["avg_daily_budget", "interests", "transport_modes"],
+      additionalProperties: false,
+    },
   },
-  required: ["city"],
+  required: ["constraints", "timezone", "user_id", "user_profile"],
   additionalProperties: false,
 };
 
+// POST /ai/explain (request)
 const aiExplainSchema = {
   type: "object",
   properties: {
-    itinerary: {
-      type: "object",
-      description: "Previously generated itinerary JSON",
+    user_id: {
+      type: "string",
+      format: "uuid",
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     },
+    trip_id: {
+      type: "string",
+      format: "uuid",
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    },
+    trip_plan: {
+      type: "object",
+      description: "Previously generated trip plan JSON",
+      additionalProperties: true,
+      example: { additionalProp1: {} },
+    },
+    question: { type: "string", example: "Чому обрано саме цей ресторан?" },
   },
-  required: ["itinerary"],
-  additionalProperties: true,
+  required: ["user_id", "trip_id", "trip_plan", "question"],
+  additionalProperties: false,
 };
 
+// POST /ai/improve (request)
 const aiImproveSchema = {
   type: "object",
   properties: {
-    itinerary: { type: "object" },
-    feedback: {
+    user_id: {
       type: "string",
-      example: "Make it more kid-friendly and add museums",
+      format: "uuid",
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    },
+    trip_id: {
+      type: "string",
+      format: "uuid",
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    },
+    current_plan: {
+      type: "object",
+      description: "Current itinerary / trip plan JSON",
+      additionalProperties: true,
+      example: { additionalProp1: {} },
+    },
+    improvement_request: {
+      type: "string",
+      example: "Додай більше ресторанів української кухні",
+    },
+    constraints: {
+      type: "object",
+      properties: {
+        origin_city: { type: "string", example: "string" },
+        destination_city: { type: "string", example: "string" },
+        start_date: { type: "string", format: "date", example: "2026-01-07" },
+        end_date: { type: "string", format: "date", example: "2026-01-07" },
+        duration_days: { type: "integer", example: 1 },
+        total_budget: { type: "integer", example: 0 },
+        travel_party_size: { type: "integer", example: 1 },
+      },
+      additionalProperties: false,
     },
   },
-  required: ["itinerary"],
-  additionalProperties: true,
+  required: ["user_id", "trip_id", "current_plan", "improvement_request"],
+  additionalProperties: false,
 };
 
 const serverUrl =
@@ -402,16 +655,30 @@ export const openapi = {
         summary: "Get city information",
         security: bearer(),
         parameters: [queryParam("city", "string", "City name", true)],
-        responses: resp([200, 400, 401]),
+        responses: resp([200, 404, 401]),
       },
     },
     "/api/v1/integrations/weather/city": {
       get: {
         tags: ["Integrations"],
-        summary: "Get 5-day weather forecast",
+        summary: "Get 5-day weather forecast by city name",
         security: bearer(),
-        parameters: [queryParam("city", "string", "City name", true)],
-        responses: resp([200, 400, 401]),
+        parameters: [
+          queryParam("city", "string", "City name", true),
+          queryParam(
+            "start_date",
+            "string",
+            "Start date filter (YYYY-MM-DD)",
+            false
+          ),
+          queryParam(
+            "end_date",
+            "string",
+            "End date filter (YYYY-MM-DD)",
+            false
+          ),
+        ],
+        responses: resp([200, 404, 401]),
       },
     },
     "/api/v1/integrations/calendar/google/connect": {
@@ -419,6 +686,7 @@ export const openapi = {
         tags: ["Integrations"],
         summary: "Start Google OAuth2 flow",
         security: bearer(),
+        parameters: [queryParam("userId", "string", "User ID", true)],
         responses: resp([302, 401]),
       },
     },
@@ -427,8 +695,8 @@ export const openapi = {
         tags: ["Integrations"],
         summary: "Google OAuth2 callback",
         parameters: [
-          queryParam("code", "string", "OAuth2 code", false),
-          queryParam("state", "string", "OAuth2 state", false),
+          queryParam("code", "string", "OAuth2 code", true),
+          queryParam("state", "string", "OAuth2 state", true),
         ],
         responses: resp([200, 400]),
       },
@@ -438,6 +706,7 @@ export const openapi = {
         tags: ["Integrations"],
         summary: "Check calendar connection status",
         security: bearer(),
+        parameters: [queryParam("userId", "string", "User ID", true)],
         responses: resp([200, 401]),
       },
     },
@@ -447,11 +716,11 @@ export const openapi = {
         summary: "Create calendar event",
         security: bearer(),
         requestBody: jsonBody(calendarEventSchema),
-        responses: resp([201, 400, 401]),
+        responses: resp([200, 400, 401]),
       },
     },
 
-    // -------- AI (gateway /api/v1/ai/* -> ai-service internal) --------
+    // -------- AI --------
     "/api/v1/ai/recommend": {
       post: {
         tags: ["AI"],

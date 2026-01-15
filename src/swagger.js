@@ -74,8 +74,14 @@ const googleIdTokenSchema = {
 const patchMeSchema = {
   type: "object",
   properties: {
-    name: { type: "string" },
-    avatarUrl: { type: "string" },
+    name: { type: "string", example: "John Doe" },
+    avatar_url: { type: "string", example: "https://example.com/avatar.png" },
+
+    plan: {
+      type: "string",
+      enum: ["Explorer", "Nomad", "Globetrotter"],
+      example: "Explorer",
+    },
   },
   additionalProperties: false,
 };
@@ -89,11 +95,29 @@ const prefsSchema = {
       items: { type: "string" },
       example: ["food", "history"],
     },
-    avg_daily_budget: { type: "int", example: 5000 },
+    avg_daily_budget: { type: "integer", example: 5000 },
     transport_modes: {
       type: "array",
-      items: { type: "string" },
+      items: { type: "string", enum: ["car", "public", "bike", "walk"] },
       example: ["car", "walk"],
+    },
+
+    theme: {
+      type: "string",
+      enum: ["light", "dark", "system"],
+      example: "system",
+    },
+    language: {
+      type: "string",
+      description: "BCP-47-like language tag (e.g. en, uk, en-US, uk-UA)",
+      example: "uk",
+    },
+
+    notifications_enabled: { type: "boolean", example: false },
+    notification_channels: {
+      type: "array",
+      items: { type: "string", enum: ["email", "push", "sms"] },
+      example: ["email"],
     },
   },
   additionalProperties: false,

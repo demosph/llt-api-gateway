@@ -71,7 +71,7 @@ export function buildApp() {
 
   // Auth & User service (users/me*)
   app.use("/api/v1/users/me", requiredAuth, authProxy);
-
+  app.use("/static", authProxy);
   // Integration / AI
   app.use("/api/v1/integrations", requiredAuth, integrationProxy);
   app.use("/api/v1/ai", requiredAuth, aiProxy);

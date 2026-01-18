@@ -93,19 +93,22 @@ const prefsSchema = {
     home_city: { type: "string", example: "Kyiv", nullable: true },
     home_lat: { type: "number", example: 50.4501, nullable: true },
     home_lng: { type: "number", example: 30.5234, nullable: true },
-
     interests: {
       type: "array",
       items: { type: "string" },
       example: ["food", "history"],
     },
     avg_daily_budget: { type: "integer", example: 5000, nullable: true },
+    currency: {
+      type: "string",
+      enum: ["USD", "EUR", "UAH"],
+      example: "UAH",
+    },
     transport_modes: {
       type: "array",
       items: { type: "string", enum: ["car", "public", "bike", "walk"] },
       example: ["car", "walk"],
     },
-
     theme: {
       type: "string",
       enum: ["light", "dark", "system"],
@@ -116,7 +119,6 @@ const prefsSchema = {
       description: "BCP-47-like language tag (e.g. en, uk, en-US, uk-UA)",
       example: "uk",
     },
-
     notifications_enabled: { type: "boolean", example: false },
     notification_channels: {
       type: "array",

@@ -28,7 +28,7 @@ export function buildApp() {
           upgradeInsecureRequests: null,
         },
       },
-    })
+    }),
   );
 
   const corsOptions = {
@@ -54,7 +54,7 @@ export function buildApp() {
       max: 120,
       standardHeaders: true,
       legacyHeaders: false,
-    })
+    }),
   );
 
   // Idempotency для state-changing
@@ -67,11 +67,11 @@ export function buildApp() {
   mountSwagger(app);
 
   // Проксі до мікросервісів
+  // Auth & User service
   app.use("/api/v1/auth", optionalAuth, authProxy);
-
-  // Auth & User service (users/me*)
   app.use("/api/v1/users/me", requiredAuth, authProxy);
   app.use("/static", authProxy);
+
   // Integration / AI
   app.use("/api/v1/integrations", requiredAuth, integrationProxy);
   app.use("/api/v1/ai", requiredAuth, aiProxy);
@@ -79,7 +79,7 @@ export function buildApp() {
   // Trips service
   app.use("/api/v1/trips", requiredAuth, tripProxy);
 
-  // ТІЛЬКИ user trips йдуть у trip-service
+  // Тільки user trips йдуть у trip-service
   app.use("/api/v1/users", (req, res, next) => {
     if (/^\/api\/v1\/users\/[^/]+\/trips(?:\/|$)/.test(req.originalUrl)) {
       return tripProxy(req, res, next);
@@ -89,7 +89,7 @@ export function buildApp() {
 
   // 404
   app.use((req, res) =>
-    res.status(404).json({ error: "NotFound", path: req.path })
+    res.status(404).json({ error: "NotFound", path: req.path }),
   );
 
   // Загальний error handler

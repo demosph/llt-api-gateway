@@ -88,14 +88,18 @@ const patchMeSchema = {
 
 const prefsSchema = {
   type: "object",
+  minProperties: 1,
   properties: {
-    home_city: { type: "string", example: "Kyiv" },
+    home_city: { type: "string", example: "Kyiv", nullable: true },
+    home_lat: { type: "number", example: 50.4501, nullable: true },
+    home_lng: { type: "number", example: 30.5234, nullable: true },
+
     interests: {
       type: "array",
       items: { type: "string" },
       example: ["food", "history"],
     },
-    avg_daily_budget: { type: "integer", example: 5000 },
+    avg_daily_budget: { type: "integer", example: 5000, nullable: true },
     transport_modes: {
       type: "array",
       items: { type: "string", enum: ["car", "public", "bike", "walk"] },
@@ -593,7 +597,7 @@ export const openapi = {
         security: bearer(),
         responses: resp([200, 401]),
       },
-      put: {
+      patch: {
         tags: ["Users"],
         summary: "Update preferences",
         security: bearer(),

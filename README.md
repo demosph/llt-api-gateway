@@ -5,6 +5,7 @@ An edge-facing HTTP gateway for the LittleLifeTrip platform. It proxies requests
 ## Features
 
 - **JWT authentication** at the gateway (RS256/HS256, optional JWKS).
+- **User context propagation** - extracts user info from JWT and forwards to downstream services via headers.
 - **Proxy & path rewriting** (`/api/v1/...` → upstream services).
 - **Correlation IDs** (`X-Request-Id`) propagation downstream.
 - **CORS** with flexible origins.
@@ -13,6 +14,16 @@ An edge-facing HTTP gateway for the LittleLifeTrip platform. It proxies requests
 - **Swagger UI** at `/api/docs`.
 - **Health endpoint** at `/api/health`.
 
+## User Context Handling
+
+The gateway automatically extracts user information from JWT tokens and forwards it to downstream services:
+
+- **x-user-id**: User ID (UUID) - Extracted from JWT token subject
+- **x-user-email**: User email address - Extracted from JWT token
+- **x-user-roles**: User roles - Extracted from JWT token claims
+
+This allows downstream services (like Trip Service) to authenticate users without requiring userId in request bodies.
+
 ## Architecture & Routing
 
 The gateway is the external entry point and routes requests to service backends.
@@ -20,11 +31,19 @@ The gateway is the external entry point and routes requests to service backends.
 | Incoming Path            | Upstream Target                | Notes                                         |
 | ------------------------ | ------------------------------ | --------------------------------------------- |
 | `/api/v1/auth/*`         | `${AUTH_BASE_URL}/v1/*`        | Public endpoints like login/register/id-token |
-| `/api/v1/trips/*`        | `${TRIPS_BASE_URL}/v1/*`       | Requires JWT                                  |
+| `/api/v1/trips/*`        | `${TRIPS_BASE_URL}/v1/*`       | Requires JWT, user context via headers        |
 | `/api/v1/integrations/*` | `${INTEGRATION_BASE_URL}/v1/*` | Mixed public/JWT                              |
 | `/api/v1/ai/*`           | `${AI_BASE_URL}/internal/v1/*` | Requires JWT                                  |
 | `/api/health`            | Handled by the gateway         | Liveness/readiness                            |
 | `/api/docs`              | Swagger UI                     | Gateway's own API                             |
+
+### New Trip Service Endpoints (via Gateway)
+
+| Endpoint                   | Method | Description                      | Auth Required              |
+| -------------------------- | ------ | -------------------------------- | -------------------------- |
+| `/api/v1/trips`            | POST   | Create new trip                  | Yes (user ID from headers) |
+| `/api/v1/trips/recommend`  | POST   | Generate AI trip recommendations | Yes (user ID from headers) |
+| `/api/v1/trips/{id}/clone` | POST   | Clone existing trip              | Yes (user ID from headers) |
 
 The exact public paths are controlled via PUBLIC_PATHS (comma-separated list of path prefixes).
 

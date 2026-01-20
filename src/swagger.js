@@ -1,29 +1,29 @@
-import swaggerUi from "swagger-ui-express";
-import cfg from "./config.js";
+import swaggerUi from 'swagger-ui-express';
+import cfg from './config.js';
 
 const bearer = () => [{ bearerAuth: [] }];
 
-const jsonBody = (schema) => ({
+const jsonBody = schema => ({
   required: true,
   content: {
-    "application/json": { schema },
+    'application/json': { schema },
   },
 });
 
 const resp = (codes = [200]) =>
-  Object.fromEntries(codes.map((c) => [c, { description: String(c) }]));
+  Object.fromEntries(codes.map(c => [c, { description: String(c) }]));
 
 const pathParam = (name, description) => ({
   name,
-  in: "path",
+  in: 'path',
   required: true,
-  schema: { type: "string" },
+  schema: { type: 'string' },
   description,
 });
 
 const queryParam = (name, type, description, required = false) => ({
   name,
-  in: "query",
+  in: 'query',
   required,
   schema: { type },
   description,
@@ -32,98 +32,98 @@ const queryParam = (name, type, description, required = false) => ({
 // базові схеми (мінімально достатні для Swagger UI)
 // Auth
 const registerSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    name: { type: "string", example: "John Doe" },
-    email: { type: "string", example: "john@example.com" },
-    password: { type: "string", example: "12345678" },
+    name: { type: 'string', example: 'John Doe' },
+    email: { type: 'string', example: 'john@example.com' },
+    password: { type: 'string', example: '12345678' },
   },
-  required: ["name", "email", "password"],
+  required: ['name', 'email', 'password'],
   additionalProperties: false,
 };
 
 const loginSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    email: { type: "string", example: "john@example.com" },
-    password: { type: "string", example: "12345678" },
+    email: { type: 'string', example: 'john@example.com' },
+    password: { type: 'string', example: '12345678' },
   },
-  required: ["email", "password"],
+  required: ['email', 'password'],
   additionalProperties: false,
 };
 
 const refreshSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    refreshToken: { type: "string" },
+    refreshToken: { type: 'string' },
   },
-  required: ["refreshToken"],
+  required: ['refreshToken'],
   additionalProperties: false,
 };
 
 const googleIdTokenSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    idToken: { type: "string", description: "Google ID token (JWT)" },
+    idToken: { type: 'string', description: 'Google ID token (JWT)' },
   },
-  required: ["idToken"],
+  required: ['idToken'],
   additionalProperties: false,
 };
 
 // Users
 const patchMeSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    name: { type: "string", example: "John Doe" },
-    avatar_url: { type: "string", example: "https://example.com/avatar.png" },
+    name: { type: 'string', example: 'John Doe' },
+    avatar_url: { type: 'string', example: 'https://example.com/avatar.png' },
 
     plan: {
-      type: "string",
-      enum: ["Explorer", "Nomad", "Globetrotter"],
-      example: "Explorer",
+      type: 'string',
+      enum: ['Explorer', 'Nomad', 'Globetrotter'],
+      example: 'Explorer',
     },
   },
   additionalProperties: false,
 };
 
 const prefsSchema = {
-  type: "object",
+  type: 'object',
   minProperties: 1,
   properties: {
-    home_city: { type: "string", example: "Kyiv", nullable: true },
-    home_lat: { type: "number", example: 50.4501, nullable: true },
-    home_lng: { type: "number", example: 30.5234, nullable: true },
+    home_city: { type: 'string', example: 'Kyiv', nullable: true },
+    home_lat: { type: 'number', example: 50.4501, nullable: true },
+    home_lng: { type: 'number', example: 30.5234, nullable: true },
     interests: {
-      type: "array",
-      items: { type: "string" },
-      example: ["food", "history"],
+      type: 'array',
+      items: { type: 'string' },
+      example: ['food', 'history'],
     },
-    avg_daily_budget: { type: "integer", example: 5000, nullable: true },
+    avg_daily_budget: { type: 'integer', example: 5000, nullable: true },
     currency: {
-      type: "string",
-      enum: ["USD", "EUR", "UAH"],
-      example: "UAH",
+      type: 'string',
+      enum: ['USD', 'EUR', 'UAH'],
+      example: 'UAH',
     },
     transport_modes: {
-      type: "array",
-      items: { type: "string", enum: ["car", "public", "bike", "walk"] },
-      example: ["car", "walk"],
+      type: 'array',
+      items: { type: 'string', enum: ['car', 'public', 'bike', 'walk'] },
+      example: ['car', 'walk'],
     },
     theme: {
-      type: "string",
-      enum: ["light", "dark", "system"],
-      example: "system",
+      type: 'string',
+      enum: ['light', 'dark', 'system'],
+      example: 'system',
     },
     language: {
-      type: "string",
-      description: "BCP-47-like language tag (e.g. en, uk, en-US, uk-UA)",
-      example: "uk",
+      type: 'string',
+      description: 'BCP-47-like language tag (e.g. en, uk, en-US, uk-UA)',
+      example: 'uk',
     },
-    notifications_enabled: { type: "boolean", example: false },
+    notifications_enabled: { type: 'boolean', example: false },
     notification_channels: {
-      type: "array",
-      items: { type: "string", enum: ["email", "push", "sms"] },
-      example: ["email"],
+      type: 'array',
+      items: { type: 'string', enum: ['email', 'push', 'sms'] },
+      example: ['email'],
     },
   },
   additionalProperties: false,
@@ -131,477 +131,526 @@ const prefsSchema = {
 
 // Trips
 const tripCreateSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    userId: {
-      type: "string",
-      format: "uuid",
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    title: { type: 'string', example: 'Weekend in Paris' },
+    startDate: { type: 'string', example: '2024-06-01' },
+    endDate: { type: 'string', example: '2024-06-03' },
+    originCity: { type: 'string', example: 'Kyiv' },
+    originLat: { type: 'number', example: 50.4501 },
+    originLng: { type: 'number', example: 30.5234 },
+    transportMode: {
+      type: 'string',
+      enum: ['car', 'public', 'bike', 'walk'],
+      example: 'car',
     },
-    title: { type: "string", example: "Weekend in Paris" },
-    startDate: { type: "string", example: "2024-06-01" },
-    endDate: { type: "string", example: "2024-06-03" },
-    originCity: { type: "string", example: "Kyiv" },
-    originLat: { type: "number", example: 50.4501 },
-    originLng: { type: "number", example: 30.5234 },
+    totalBudgetEstimate: { type: 'number', example: 800 },
+    currency: { type: 'string', example: 'USD' },
   },
-  required: [
-    "userId",
-    "title",
-    "startDate",
-    "endDate",
-    "originCity",
-    "originLat",
-    "originLng",
-  ],
+  required: ['title', 'startDate', 'endDate'],
   additionalProperties: false,
 };
 
 const tripPatchSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    title: { type: "string", example: "Updated Trip Title" },
-    startDate: { type: "string", example: "2024-06-01" },
-    endDate: { type: "string", example: "2024-06-05" },
-    originCity: { type: "string", example: "Lviv" },
-    originLat: { type: "number", example: 49.8397 },
-    originLng: { type: "number", example: 24.0297 },
+    title: { type: 'string', example: 'Updated Trip Title' },
+    startDate: { type: 'string', example: '2024-06-01' },
+    endDate: { type: 'string', example: '2024-06-05' },
+    originCity: { type: 'string', example: 'Lviv' },
+    originLat: { type: 'number', example: 49.8397 },
+    originLng: { type: 'number', example: 24.0297 },
   },
   additionalProperties: false,
 };
 
 const tripAddItemSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     googlePlaceId: {
-      type: "string",
-      example: "ChIJD7fiBh9u5kcRYJSMaMOCCwQ",
+      type: 'string',
+      example: 'ChIJD7fiBh9u5kcRYJSMaMOCCwQ',
     },
-    name: { type: "string", example: "Eiffel Tower" },
+    name: { type: 'string', example: 'Eiffel Tower' },
     location: {
-      type: "object",
+      type: 'object',
       properties: {
-        lat: { type: "number", example: 48.8584 },
-        lng: { type: "number", example: 2.2945 },
+        lat: { type: 'number', example: 48.8584 },
+        lng: { type: 'number', example: 2.2945 },
       },
-      required: ["lat", "lng"],
+      required: ['lat', 'lng'],
       additionalProperties: false,
     },
     address: {
-      type: "string",
-      example: "Champ de Mars, 5 Av. Anatole France",
+      type: 'string',
+      example: 'Champ de Mars, 5 Av. Anatole France',
     },
     categories: {
-      type: "array",
-      items: { type: "string" },
-      example: ["string"],
+      type: 'array',
+      items: { type: 'string' },
+      example: ['string'],
     },
-    dayIndex: { type: "integer", example: 0 },
-    orderIndex: { type: "integer", example: 1 },
-    title: { type: "string", example: "string" },
-    description: { type: "string", example: "string" },
+    dayIndex: { type: 'integer', example: 0 },
+    orderIndex: { type: 'integer', example: 1 },
+    title: { type: 'string', example: 'string' },
+    description: { type: 'string', example: 'string' },
   },
-  required: ["googlePlaceId", "name", "location", "dayIndex", "orderIndex"],
+  required: ['googlePlaceId', 'name', 'location', 'dayIndex', 'orderIndex'],
   additionalProperties: false,
 };
 
 // Integrations
 // POST /maps/pois (request)
 const integrationPoisSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    city: { type: "string", example: "Київ" },
+    city: { type: 'string', example: 'Київ' },
     interests: {
-      type: "array",
-      items: { type: "string" },
-      example: ["history", "food"],
+      type: 'array',
+      items: { type: 'string' },
+      example: ['history', 'food'],
     },
   },
-  required: ["city", "interests"],
+  required: ['city', 'interests'],
   additionalProperties: false,
 };
 
 // POST /maps/pois (response)
 const poiSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    name: { type: "string", example: "Софійський собор" },
-    lat: { type: "number", example: 50.4529 },
-    lng: { type: "number", example: 30.5143 },
-    rating: { type: "number", example: 4.9 },
-    category: { type: "string", example: "history" },
-    city: { type: "string", example: "Київ" },
+    name: { type: 'string', example: 'Софійський собор' },
+    lat: { type: 'number', example: 50.4529 },
+    lng: { type: 'number', example: 30.5143 },
+    rating: { type: 'number', example: 4.9 },
+    category: { type: 'string', example: 'history' },
+    city: { type: 'string', example: 'Київ' },
   },
-  required: ["name", "lat", "lng", "category", "city"],
+  required: ['name', 'lat', 'lng', 'category', 'city'],
   additionalProperties: false,
 };
 
 const poisResponseSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     data: {
-      type: "array",
+      type: 'array',
       items: poiSchema,
     },
   },
-  required: ["data"],
+  required: ['data'],
   additionalProperties: false,
 };
 
 // GET /maps/city (response)
 const cityInfoResponseSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     data: {
-      type: "object",
+      type: 'object',
       properties: {
-        name: { type: "string", example: "Київ" },
-        name_en: { type: "string", example: "Kyiv" },
+        name: { type: 'string', example: 'Київ' },
+        name_en: { type: 'string', example: 'Kyiv' },
         coordinates: {
-          type: "object",
+          type: 'object',
           properties: {
-            lat: { type: "number", example: 50.4501 },
-            lng: { type: "number", example: 30.5234 },
+            lat: { type: 'number', example: 50.4501 },
+            lng: { type: 'number', example: 30.5234 },
           },
-          required: ["lat", "lng"],
+          required: ['lat', 'lng'],
           additionalProperties: false,
         },
-        country: { type: "string", example: "Ukraine" },
+        country: { type: 'string', example: 'Ukraine' },
       },
-      required: ["name", "name_en", "coordinates", "country"],
+      required: ['name', 'name_en', 'coordinates', 'country'],
       additionalProperties: false,
     },
   },
-  required: ["data"],
+  required: ['data'],
   additionalProperties: false,
 };
 
 // GET /weather/city (response)
 const weatherForecastItemSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    date: { type: "string", example: "2025-12-18" },
-    temp_min_c: { type: "number", example: -2.5 },
-    temp_max_c: { type: "number", example: 3.8 },
-    condition: { type: "string", example: "light snow" },
-    humidity_percent: { type: "number", example: 78 },
-    precipitation_chance: { type: "number", example: 60 },
+    date: { type: 'string', example: '2025-12-18' },
+    temp_min_c: { type: 'number', example: -2.5 },
+    temp_max_c: { type: 'number', example: 3.8 },
+    condition: { type: 'string', example: 'light snow' },
+    humidity_percent: { type: 'number', example: 78 },
+    precipitation_chance: { type: 'number', example: 60 },
   },
   required: [
-    "date",
-    "temp_min_c",
-    "temp_max_c",
-    "condition",
-    "humidity_percent",
-    "precipitation_chance",
+    'date',
+    'temp_min_c',
+    'temp_max_c',
+    'condition',
+    'humidity_percent',
+    'precipitation_chance',
   ],
   additionalProperties: false,
 };
 
 const weatherForecastResponseSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     data: {
-      type: "object",
+      type: 'object',
       properties: {
-        city: { type: "string", example: "Київ" },
-        city_en: { type: "string", example: "Kyiv" },
+        city: { type: 'string', example: 'Київ' },
+        city_en: { type: 'string', example: 'Kyiv' },
         coordinates: {
-          type: "object",
+          type: 'object',
           properties: {
-            lat: { type: "number", example: 50.4501 },
-            lng: { type: "number", example: 30.5234 },
+            lat: { type: 'number', example: 50.4501 },
+            lng: { type: 'number', example: 30.5234 },
           },
-          required: ["lat", "lng"],
+          required: ['lat', 'lng'],
           additionalProperties: false,
         },
         forecast: {
-          type: "array",
+          type: 'array',
           items: weatherForecastItemSchema,
         },
       },
-      required: ["city", "city_en", "coordinates", "forecast"],
+      required: ['city', 'city_en', 'coordinates', 'forecast'],
       additionalProperties: false,
     },
   },
-  required: ["data"],
+  required: ['data'],
   additionalProperties: false,
 };
 
 // GET /calendar/status (response)
 const calendarStatusResponseSchema = {
-  type: "object",
+  type: 'object',
   properties: {
-    connected: { type: "boolean", example: true },
+    connected: { type: 'boolean', example: true },
   },
-  required: ["connected"],
+  required: ['connected'],
   additionalProperties: false,
 };
 
 // POST /calendar/events (request)
 const calendarEventSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     userId: {
-      type: "string",
-      format: "uuid",
-      example: "550e8400-e29b-41d4-a716-446655440000",
+      type: 'string',
+      format: 'uuid',
+      example: '550e8400-e29b-41d4-a716-446655440000',
     },
-    title: { type: "string", example: "Trip to Paris" },
-    startDate: { type: "string", example: "2024-01-15" },
-    endDate: { type: "string", example: "2024-01-20" },
-    description: { type: "string", example: "Vacation in France" },
+    title: { type: 'string', example: 'Trip to Paris' },
+    startDate: { type: 'string', example: '2024-01-15' },
+    endDate: { type: 'string', example: '2024-01-20' },
+    description: { type: 'string', example: 'Vacation in France' },
   },
-  required: ["userId", "title", "startDate", "endDate"],
+  required: ['userId', 'title', 'startDate', 'endDate'],
   additionalProperties: false,
 };
 
 // POST /calendar/events (response)
 const calendarEventCreateResponseSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     data: {
-      type: "object",
+      type: 'object',
       properties: {
-        eventId: { type: "string", example: "abc123xyz" },
+        eventId: { type: 'string', example: 'abc123xyz' },
         link: {
-          type: "string",
-          example: "https://calendar.google.com/event?eid=abc123xyz",
+          type: 'string',
+          example: 'https://calendar.google.com/event?eid=abc123xyz',
         },
       },
-      required: ["eventId", "link"],
+      required: ['eventId', 'link'],
       additionalProperties: false,
     },
   },
-  required: ["data"],
+  required: ['data'],
   additionalProperties: false,
 };
 
 // AI
 
+const tripRecommendSchema = {
+  type: 'object',
+  properties: {
+    origin: {
+      type: 'object',
+      properties: {
+        city: { type: 'string', example: 'Kyiv' },
+        lat: { type: 'number', example: 50.4501 },
+        lng: { type: 'number', example: 30.5234 },
+      },
+      required: ['city'],
+    },
+    dates: {
+      type: 'object',
+      properties: {
+        start: { type: 'string', example: '2024-06-01' },
+        end: { type: 'string', example: '2024-06-08' },
+      },
+      required: ['start', 'end'],
+    },
+    budget: { type: 'number', example: 2000 },
+    interests: {
+      type: 'array',
+      items: { type: 'string' },
+      example: ['culture', 'history', 'museums'],
+    },
+    transport: {
+      type: 'string',
+      enum: ['car', 'public', 'bike', 'walk'],
+      example: 'car',
+    },
+    timezone: { type: 'string', example: 'Europe/Kyiv' },
+    dryRun: { type: 'boolean', example: false },
+    currency: { type: 'string', example: 'UAH' },
+    language: { type: 'string', example: 'Ukrainian' },
+  },
+  required: ['origin', 'dates', 'budget', 'interests', 'transport'],
+  additionalProperties: false,
+};
+
 const aiRecommendSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     constraints: {
-      type: "object",
+      type: 'object',
       properties: {
-        destination_city: { type: "string", example: "Львів" },
-        duration_days: { type: "integer", example: 3 },
-        origin_city: { type: "string", example: "Київ" },
-        total_budget: { type: "integer", example: 15000 },
-        travel_party_size: { type: "integer", example: 2 },
+        destination_city: { type: 'string', example: 'Львів' },
+        duration_days: { type: 'integer', example: 3 },
+        origin_city: { type: 'string', example: 'Київ' },
+        total_budget: { type: 'integer', example: 15000 },
+        travel_party_size: { type: 'integer', example: 2 },
       },
       required: [
-        "destination_city",
-        "duration_days",
-        "origin_city",
-        "total_budget",
-        "travel_party_size",
+        'destination_city',
+        'duration_days',
+        'origin_city',
+        'total_budget',
+        'travel_party_size',
       ],
       additionalProperties: false,
     },
-    timezone: { type: "string", example: "Europe/Kyiv" },
+    timezone: { type: 'string', example: 'Europe/Kyiv' },
     user_id: {
-      type: "string",
-      format: "uuid",
-      example: "550e8400-e29b-41d4-a716-446655440000",
+      type: 'string',
+      format: 'uuid',
+      example: '550e8400-e29b-41d4-a716-446655440000',
     },
     user_profile: {
-      type: "object",
+      type: 'object',
       properties: {
-        avg_daily_budget: { type: "integer", example: 2000 },
+        avg_daily_budget: { type: 'integer', example: 2000 },
         interests: {
-          type: "array",
-          items: { type: "string" },
-          example: ["history", "food", "culture"],
+          type: 'array',
+          items: { type: 'string' },
+          example: ['history', 'food', 'culture'],
         },
         transport_modes: {
-          type: "array",
-          items: { type: "string" },
-          example: ["walking", "public_transport"],
+          type: 'array',
+          items: { type: 'string' },
+          example: ['walking', 'public_transport'],
         },
       },
-      required: ["avg_daily_budget", "interests", "transport_modes"],
+      required: ['avg_daily_budget', 'interests', 'transport_modes'],
       additionalProperties: false,
     },
   },
-  required: ["constraints", "timezone", "user_id", "user_profile"],
+  required: ['constraints', 'timezone', 'user_id', 'user_profile'],
   additionalProperties: false,
 };
 
 // POST /ai/explain (request)
 const aiExplainSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     user_id: {
-      type: "string",
-      format: "uuid",
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      type: 'string',
+      format: 'uuid',
+      example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     },
     trip_id: {
-      type: "string",
-      format: "uuid",
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      type: 'string',
+      format: 'uuid',
+      example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     },
     trip_plan: {
-      type: "object",
-      description: "Previously generated trip plan JSON",
+      type: 'object',
+      description: 'Previously generated trip plan JSON',
       additionalProperties: true,
       example: { additionalProp1: {} },
     },
-    question: { type: "string", example: "Чому обрано саме цей ресторан?" },
+    question: { type: 'string', example: 'Чому обрано саме цей ресторан?' },
   },
-  required: ["user_id", "trip_id", "trip_plan", "question"],
+  required: ['user_id', 'trip_id', 'trip_plan', 'question'],
   additionalProperties: false,
 };
 
 // POST /ai/improve (request)
 const aiImproveSchema = {
-  type: "object",
+  type: 'object',
   properties: {
     user_id: {
-      type: "string",
-      format: "uuid",
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      type: 'string',
+      format: 'uuid',
+      example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     },
     trip_id: {
-      type: "string",
-      format: "uuid",
-      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      type: 'string',
+      format: 'uuid',
+      example: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     },
     current_plan: {
-      type: "object",
-      description: "Current itinerary / trip plan JSON",
+      type: 'object',
+      description: 'Current itinerary / trip plan JSON',
       additionalProperties: true,
       example: { additionalProp1: {} },
     },
     improvement_request: {
-      type: "string",
-      example: "Додай більше ресторанів української кухні",
+      type: 'string',
+      example: 'Додай більше ресторанів української кухні',
     },
     constraints: {
-      type: "object",
+      type: 'object',
       properties: {
-        origin_city: { type: "string", example: "string" },
-        destination_city: { type: "string", example: "string" },
-        start_date: { type: "string", format: "date", example: "2026-01-07" },
-        end_date: { type: "string", format: "date", example: "2026-01-07" },
-        duration_days: { type: "integer", example: 1 },
-        total_budget: { type: "integer", example: 0 },
-        travel_party_size: { type: "integer", example: 1 },
+        origin_city: { type: 'string', example: 'string' },
+        destination_city: { type: 'string', example: 'string' },
+        start_date: { type: 'string', format: 'date', example: '2026-01-07' },
+        end_date: { type: 'string', format: 'date', example: '2026-01-07' },
+        duration_days: { type: 'integer', example: 1 },
+        total_budget: { type: 'integer', example: 0 },
+        travel_party_size: { type: 'integer', example: 1 },
       },
       additionalProperties: false,
     },
   },
-  required: ["user_id", "trip_id", "current_plan", "improvement_request"],
+  required: ['user_id', 'trip_id', 'current_plan', 'improvement_request'],
   additionalProperties: false,
 };
 
 const serverUrl =
-  typeof cfg.publicBaseUrl === "string" &&
+  typeof cfg.publicBaseUrl === 'string' &&
   /^https?:\/\//.test(cfg.publicBaseUrl)
     ? cfg.publicBaseUrl
-    : "/";
+    : '/';
 
 export const openapi = {
-  openapi: "3.0.3",
+  openapi: '3.0.3',
   info: {
-    title: "LittleLifeTrip API Gateway",
-    version: "1.0.0",
+    title: 'LittleLifeTrip API Gateway',
+    version: '1.0.0',
     description:
-      "Aggregated API (Auth, Trips, Integrations, AI) via API Gateway.",
+      'Aggregated API (Auth, Trips, Integrations, AI) via API Gateway.\n\n' +
+      '## Authentication\n' +
+      'All protected endpoints require JWT Bearer token in Authorization header.\n' +
+      'The Gateway automatically extracts user context and forwards it to downstream services:\n' +
+      '- **x-user-id**: User ID (UUID) - Extracted from JWT token\n' +
+      '- **x-user-email**: User email address - Extracted from JWT token\n' +
+      '- **x-user-roles**: User roles - Extracted from JWT token\n\n' +
+      '## Trip Service Changes\n' +
+      'Trip service endpoints now use user context from headers instead of userId in request body:\n' +
+      '- POST /api/v1/trips - Uses authenticated user ID from headers\n' +
+      '- POST /api/v1/trips/recommend - Uses authenticated user ID from headers\n' +
+      '- POST /api/v1/trips/{id}/clone - Uses authenticated user ID from headers\n\n' +
+      'Example Authorization header:\n' +
+      '```\n' +
+      'Authorization: Bearer <your-jwt-token>\n' +
+      '```',
   },
 
   // ВАЖЛИВО: тут має бути URL зі схемою http/https
   servers: [{ url: serverUrl }],
 
   tags: [
-    { name: "Gateway" },
-    { name: "Auth" },
-    { name: "Users" },
-    { name: "Trips" },
-    { name: "Integrations" },
-    { name: "AI" },
+    { name: 'Gateway' },
+    { name: 'Auth' },
+    { name: 'Users' },
+    { name: 'Trips' },
+    { name: 'Integrations' },
+    { name: 'AI' },
   ],
 
   paths: {
     // Gateway
-    "/api/health": {
+    '/api/health': {
       get: {
-        tags: ["Gateway"],
-        summary: "Health check",
-        responses: { 200: { description: "OK" } },
+        tags: ['Gateway'],
+        summary: 'Health check',
+        responses: { 200: { description: 'OK' } },
       },
     },
 
     // -------- Auth (Auth service) --------
-    "/api/v1/auth/register": {
+    '/api/v1/auth/register': {
       post: {
-        tags: ["Auth"],
-        summary: "Register",
+        tags: ['Auth'],
+        summary: 'Register',
         requestBody: jsonBody(registerSchema),
         responses: resp([201, 400, 409]),
       },
     },
-    "/api/v1/auth/login": {
+    '/api/v1/auth/login': {
       post: {
-        tags: ["Auth"],
-        summary: "Login",
+        tags: ['Auth'],
+        summary: 'Login',
         requestBody: jsonBody(loginSchema),
         responses: resp([200, 400, 401]),
       },
     },
-    "/api/v1/auth/oauth/google/idtoken": {
+    '/api/v1/auth/oauth/google/idtoken': {
       post: {
-        tags: ["Auth"],
-        summary: "Google OAuth by idToken",
+        tags: ['Auth'],
+        summary: 'Google OAuth by idToken',
         requestBody: jsonBody(googleIdTokenSchema),
         responses: resp([200, 400, 401]),
       },
     },
-    "/api/v1/auth/refresh": {
+    '/api/v1/auth/refresh': {
       post: {
-        tags: ["Auth"],
-        summary: "Refresh tokens",
+        tags: ['Auth'],
+        summary: 'Refresh tokens',
         requestBody: jsonBody(refreshSchema),
         responses: resp([200, 400, 401]),
       },
     },
-    "/api/v1/auth/logout": {
+    '/api/v1/auth/logout': {
       post: {
-        tags: ["Auth"],
-        summary: "Logout",
+        tags: ['Auth'],
+        summary: 'Logout',
         requestBody: jsonBody(refreshSchema),
         responses: resp([200, 400, 401]),
       },
     },
 
     // -------- Users (Auth service) --------
-    "/api/v1/users/me": {
+    '/api/v1/users/me': {
       get: {
-        tags: ["Users"],
-        summary: "Get current user",
+        tags: ['Users'],
+        summary: 'Get current user',
         security: bearer(),
         responses: resp([200, 401]),
       },
       patch: {
-        tags: ["Users"],
-        summary: "Update current user",
+        tags: ['Users'],
+        summary: 'Update current user',
         security: bearer(),
         requestBody: jsonBody(patchMeSchema),
         responses: resp([200, 400, 401]),
       },
     },
-    "/api/v1/users/me/preferences": {
+    '/api/v1/users/me/preferences': {
       get: {
-        tags: ["Users"],
-        summary: "Get preferences",
+        tags: ['Users'],
+        summary: 'Get preferences',
         security: bearer(),
         responses: resp([200, 401]),
       },
       patch: {
-        tags: ["Users"],
-        summary: "Update preferences",
+        tags: ['Users'],
+        summary: 'Update preferences',
         security: bearer(),
         requestBody: jsonBody(prefsSchema),
         responses: resp([200, 400, 401]),
@@ -609,141 +658,159 @@ export const openapi = {
     },
 
     // -------- Trips --------
-    "/api/v1/trips": {
+    '/api/v1/trips': {
       post: {
-        tags: ["Trips"],
-        summary: "Create a new trip",
+        tags: ['Trips'],
+        summary: 'Create a new trip',
         security: bearer(),
         requestBody: jsonBody(tripCreateSchema),
         responses: resp([201, 400, 401]),
       },
     },
-    "/api/v1/trips/{id}": {
-      parameters: [pathParam("id", "Trip ID")],
+    '/api/v1/trips/{id}': {
+      parameters: [pathParam('id', 'Trip ID')],
       get: {
-        tags: ["Trips"],
-        summary: "Get trip by ID",
+        tags: ['Trips'],
+        summary: 'Get trip by ID',
         security: bearer(),
         responses: resp([200, 401, 404]),
       },
       patch: {
-        tags: ["Trips"],
-        summary: "Update a trip",
+        tags: ['Trips'],
+        summary: 'Update a trip',
         security: bearer(),
         requestBody: jsonBody(tripPatchSchema),
         responses: resp([200, 400, 401, 404]),
       },
       delete: {
-        tags: ["Trips"],
-        summary: "Delete a trip",
+        tags: ['Trips'],
+        summary: 'Delete a trip',
         security: bearer(),
         responses: resp([200, 401, 404]),
       },
     },
-    "/api/v1/users/{userId}/trips": {
-      parameters: [pathParam("userId", "User ID")],
+    '/api/v1/users/{userId}/trips': {
+      parameters: [pathParam('userId', 'User ID')],
       get: {
-        tags: ["Trips"],
-        summary: "Get all trips for a user",
+        tags: ['Trips'],
+        summary: 'Get all trips for a user',
         security: bearer(),
         responses: resp([200, 401]),
       },
     },
-    "/api/v1/trips/{id}/items": {
-      parameters: [pathParam("id", "Trip ID")],
+    '/api/v1/trips/{id}/items': {
+      parameters: [pathParam('id', 'Trip ID')],
       post: {
-        tags: ["Trips"],
-        summary: "Add itinerary item to trip",
+        tags: ['Trips'],
+        summary: 'Add itinerary item to trip',
         security: bearer(),
         requestBody: jsonBody(tripAddItemSchema),
         responses: resp([201, 400, 401, 404]),
       },
     },
-    "/api/v1/trips/{id}/map": {
-      parameters: [pathParam("id", "Trip ID")],
+    '/api/v1/trips/{id}/map': {
+      parameters: [pathParam('id', 'Trip ID')],
       get: {
-        tags: ["Trips"],
-        summary: "Get map data for trip",
+        tags: ['Trips'],
+        summary: 'Get map data for trip',
         security: bearer(),
         responses: resp([200, 401, 404]),
       },
     },
+    '/api/v1/trips/recommend': {
+      post: {
+        tags: ['Trips'],
+        summary: 'Generate AI trip recommendation',
+        security: bearer(),
+        requestBody: jsonBody(tripRecommendSchema),
+        responses: resp([200, 400, 401]),
+      },
+    },
+    '/api/v1/trips/{id}/clone': {
+      parameters: [pathParam('id', 'Trip ID')],
+      post: {
+        tags: ['Trips'],
+        summary: 'Clone a trip',
+        security: bearer(),
+        responses: resp([201, 401, 404]),
+      },
+    },
 
     // -------- Integrations --------
-    "/api/v1/integrations/maps/pois": {
+    '/api/v1/integrations/maps/pois': {
       post: {
-        tags: ["Integrations"],
-        summary: "Search POIs by city and interests",
+        tags: ['Integrations'],
+        summary: 'Search POIs by city and interests',
         security: bearer(),
         requestBody: jsonBody(integrationPoisSchema),
         responses: resp([200, 400, 401]),
       },
     },
-    "/api/v1/integrations/maps/city": {
+    '/api/v1/integrations/maps/city': {
       get: {
-        tags: ["Integrations"],
-        summary: "Get city information",
+        tags: ['Integrations'],
+        summary: 'Get city information',
         security: bearer(),
-        parameters: [queryParam("city", "string", "City name", true)],
+        parameters: [queryParam('city', 'string', 'City name', true)],
         responses: resp([200, 404, 401]),
       },
     },
-    "/api/v1/integrations/weather/city": {
+    '/api/v1/integrations/weather/city': {
       get: {
-        tags: ["Integrations"],
-        summary: "Get 5-day weather forecast by city name",
+        tags: ['Integrations'],
+        summary: 'Get 5-day weather forecast by city name',
         security: bearer(),
         parameters: [
-          queryParam("city", "string", "City name", true),
+          queryParam('city', 'string', 'City name', true),
           queryParam(
-            "start_date",
-            "string",
-            "Start date filter (YYYY-MM-DD)",
-            false
+            'start_date',
+            'string',
+            'Start date filter (YYYY-MM-DD)',
+            false,
           ),
           queryParam(
-            "end_date",
-            "string",
-            "End date filter (YYYY-MM-DD)",
-            false
+            'end_date',
+            'string',
+            'End date filter (YYYY-MM-DD)',
+            false,
           ),
         ],
         responses: resp([200, 404, 401]),
       },
     },
-    "/api/v1/integrations/calendar/google/connect": {
+    '/api/v1/integrations/calendar/google/connect': {
       get: {
-        tags: ["Integrations"],
-        summary: "Start Google OAuth2 flow",
+        tags: ['Integrations'],
+        summary: 'Start Google OAuth2 flow',
         security: bearer(),
-        parameters: [queryParam("userId", "string", "User ID", true)],
+        parameters: [queryParam('userId', 'string', 'User ID', true)],
         responses: resp([302, 401]),
       },
     },
-    "/api/v1/integrations/calendar/google/callback": {
+    '/api/v1/integrations/calendar/google/callback': {
       get: {
-        tags: ["Integrations"],
-        summary: "Google OAuth2 callback",
+        tags: ['Integrations'],
+        summary: 'Google OAuth2 callback',
         parameters: [
-          queryParam("code", "string", "OAuth2 code", true),
-          queryParam("state", "string", "OAuth2 state", true),
+          queryParam('code', 'string', 'OAuth2 code', true),
+          queryParam('state', 'string', 'OAuth2 state', true),
         ],
         responses: resp([200, 400]),
       },
     },
-    "/api/v1/integrations/calendar/status": {
+    '/api/v1/integrations/calendar/status': {
       get: {
-        tags: ["Integrations"],
-        summary: "Check calendar connection status",
+        tags: ['Integrations'],
+        summary: 'Check calendar connection status',
         security: bearer(),
-        parameters: [queryParam("userId", "string", "User ID", true)],
+        parameters: [queryParam('userId', 'string', 'User ID', true)],
         responses: resp([200, 401]),
       },
     },
-    "/api/v1/integrations/calendar/events": {
+    '/api/v1/integrations/calendar/events': {
       post: {
-        tags: ["Integrations"],
-        summary: "Create calendar event",
+        tags: ['Integrations'],
+        summary: 'Create calendar event',
         security: bearer(),
         requestBody: jsonBody(calendarEventSchema),
         responses: resp([200, 400, 401]),
@@ -751,28 +818,28 @@ export const openapi = {
     },
 
     // -------- AI --------
-    "/api/v1/ai/recommend": {
+    '/api/v1/ai/recommend': {
       post: {
-        tags: ["AI"],
-        summary: "Generate recommendation",
+        tags: ['AI'],
+        summary: 'Generate recommendation',
         security: bearer(),
         requestBody: jsonBody(aiRecommendSchema),
         responses: resp([200, 400, 401]),
       },
     },
-    "/api/v1/ai/explain": {
+    '/api/v1/ai/explain': {
       post: {
-        tags: ["AI"],
-        summary: "Explain itinerary",
+        tags: ['AI'],
+        summary: 'Explain itinerary',
         security: bearer(),
         requestBody: jsonBody(aiExplainSchema),
         responses: resp([200, 400, 401]),
       },
     },
-    "/api/v1/ai/improve": {
+    '/api/v1/ai/improve': {
       post: {
-        tags: ["AI"],
-        summary: "Improve itinerary",
+        tags: ['AI'],
+        summary: 'Improve itinerary',
         security: bearer(),
         requestBody: jsonBody(aiImproveSchema),
         responses: resp([200, 400, 401]),
@@ -782,11 +849,11 @@ export const openapi = {
 
   components: {
     securitySchemes: {
-      bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
+      bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
     },
   },
 };
 
 export function mountSwagger(app) {
-  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapi));
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapi));
 }

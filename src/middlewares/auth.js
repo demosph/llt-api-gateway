@@ -8,7 +8,7 @@ function verify(req, res, required) {
 
   if (!token) {
     if (required) return res.status(401).json({ error: "NoToken" });
-    return next();
+    return null;
   }
 
   try {
@@ -17,7 +17,6 @@ function verify(req, res, required) {
         ? jwt.verify(token, cfg.jwt.publicKey, { algorithms: ["RS256"] })
         : jwt.verify(token, cfg.jwt.secret, { algorithms: ["HS256"] });
 
-    // покладемо корисну інфу у заголовки, щоб сервіси знали користувача
     req.user = { id: payload.sub, email: payload.email, roles: payload.roles };
     return payload;
   } catch (e) {

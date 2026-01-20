@@ -10,7 +10,7 @@ const cfg = {
   corsOrigin: process.env.CORS_ORIGIN ?? "*",
 
   jwt: {
-    alg: process.env.JWT_ALG ?? "RS256",
+    alg: process.env.JWT_ALG ?? "HS256",
     publicKeyPath: process.env.JWT_PUBLIC_KEY_PATH,
     secret: process.env.JWT_SECRET,
   },

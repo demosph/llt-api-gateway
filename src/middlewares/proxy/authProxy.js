@@ -11,16 +11,34 @@ const rewriteAuth = (_path, req) => {
 };
 
 export const authProxy = makeProxy({
-  target: cfg.upstream.auth, // http://auth-service:3001
+  target: cfg.upstream.auth, // e.g. http://auth-service:3001
   changeOrigin: true,
   pathRewrite: rewriteAuth,
 
   onProxyReq: (proxyReq, req) => {
+    // Forward Authorization (JWT) if present
     if (req.headers.authorization) {
       proxyReq.setHeader("authorization", req.headers.authorization);
     }
+
+    // Correlation id
     const cid = req.headers["x-correlation-id"] || req.id;
     if (cid) proxyReq.setHeader("x-correlation-id", cid);
+
+    // Forward user context resolved by gateway auth middleware (if any)
+    // NOTE: downstream services must trust these headers only when requests
+    // come from the gateway/internal network.
+    if (req.user?.id) proxyReq.setHeader("x-user-id", req.user.id);
+    if (req.user?.email) proxyReq.setHeader("x-user-email", req.user.email);
+
+    if (req.user?.roles) {
+      proxyReq.setHeader(
+        "x-user-roles",
+        Array.isArray(req.user.roles)
+          ? req.user.roles.join(",")
+          : String(req.user.roles),
+      );
+    }
   },
 
   onError: (err, _req, res) => {

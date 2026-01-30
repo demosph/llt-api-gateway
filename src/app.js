@@ -80,7 +80,7 @@ export function buildApp() {
   app.use("/api/v1/trips", requiredAuth, tripProxy);
 
   // Тільки user trips йдуть у trip-service
-  app.use("/api/v1/users", (req, res, next) => {
+  app.use("/api/v1/users", requiredAuth, (req, res, next) => {
     if (/^\/api\/v1\/users\/[^/]+\/trips(?:\/|$)/.test(req.originalUrl)) {
       return tripProxy(req, res, next);
     }

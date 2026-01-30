@@ -20,23 +20,22 @@ export const makeProxy = (opts) => {
     logLevel: "warn",
 
     ...opts,
+    on: {
+      proxyReq: (proxyReq, req, res) => {
+        if (typeof userOnProxyReq === "function") {
+          userOnProxyReq(proxyReq, req, res);
+        }
+        proxyReq.removeHeader("connection");
+      },
+      error: (err, req, res) => {
+        if (typeof userOnError === "function") return userOnError(err, req, res);
+        if (res.headersSent) return;
 
-    onProxyReq: (proxyReq, req, res) => {
-      if (typeof userOnProxyReq === "function") {
-        userOnProxyReq(proxyReq, req, res);
-      }
-
-      proxyReq.removeHeader("connection");
-    },
-
-    onError: (err, req, res) => {
-      if (typeof userOnError === "function") return userOnError(err, req, res);
-      if (res.headersSent) return;
-
-      res.status(502).json({
-        error: "Upstream is unavailable",
-        detail: err.code || err.message,
-      });
+        res.status(502).json({
+          error: "Upstream is unavailable",
+          detail: err.code || err.message,
+        });
+      },
     },
   });
 };

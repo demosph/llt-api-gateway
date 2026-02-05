@@ -47,7 +47,7 @@ export function idempotency() {
           await redis.setex(
             cacheKey,
             cfg.idempotencyTtl,
-            JSON.stringify(payload)
+            JSON.stringify(payload),
           );
         } else {
           memory.set(cacheKey, payload);

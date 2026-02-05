@@ -1,13 +1,20 @@
 import jwt from "jsonwebtoken";
 import cfg from "../config.js";
 
-// Мідлвар для перевірки Bearer JWT
-function verify(req, res, required) {
+// Parse Bearer token once
+function getBearerToken(req) {
   const hdr = req.headers.authorization || "";
-  const token = hdr.startsWith("Bearer ") ? hdr.slice(7) : null;
+  return hdr.startsWith("Bearer ") ? hdr.slice(7) : null;
+}
+
+// Verify token; when required=true, sends 401 and returns null
+function verify(req, res, required) {
+  const token = getBearerToken(req);
 
   if (!token) {
-    if (required) return res.status(401).json({ error: "NoToken" });
+    if (required) {
+      res.status(401).json({ error: "NoToken" });
+    }
     return null;
   }
 
@@ -19,21 +26,21 @@ function verify(req, res, required) {
 
     req.user = { id: payload.sub, email: payload.email, roles: payload.roles };
     return payload;
-  } catch (e) {
-    if (required) return res.status(401).json({ error: "InvalidToken" });
+  } catch (_) {
+    if (required) {
+      res.status(401).json({ error: "InvalidToken" });
+    }
     return null;
   }
 }
 
 export function optionalAuth(req, res, next) {
-  try {
-    verify(req, res, false);
-  } catch (_) {}
+  verify(req, res, false);
   next();
 }
 
 export function requiredAuth(req, res, next) {
-  const ok = verify(req, res, true);
-  if (!ok) return; // відповідь уже надіслано
+  const payload = verify(req, res, true);
+  if (!payload) return; // 401 already sent (or no token)
   next();
 }

@@ -17,8 +17,23 @@ jobs:
     permissions:
       id-token: write # for OIDC
       contents: read
+
     steps:
       - uses: actions/checkout@v4
+
+      # ---------- UNIT TESTS ----------
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+      # -------------------------------
 
       - name: Configure AWS creds (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
